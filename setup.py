@@ -1,17 +1,24 @@
 # coding: utf-8
 
 from setuptools import setup
+from gladiator import get_version
+
+
+def read_file(f):
+    with open(f, 'r') as _file:
+        return _file.read()
+
 
 setup(
     name='Gladiator',
-    version='0.1-dev',
+    version=get_version(),
     url='https://github.com/laco/gladiator',
     download_url='https://github.com/laco/gladiator/tarball/0.1',
     license='BSD',
     author='László Andrási',
     author_email='mail@laszloandrasi.com',
     description='Gladiator is a Data Validation Framework for Python3',
-    long_description=open('README.rst').read() + '\n\n',
+    long_description=read_file('README.rst') + '\n\n',
     packages=['gladiator'],
     include_package_data=True,
     zip_safe=False,
