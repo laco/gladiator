@@ -4,7 +4,6 @@ from gettext import NullTranslations
 
 logger = getLogger(__name__)
 
-# legyen beállíthato, hogy elso hibanal megalljon
 
 default_validation_ctx = {
     '_trans': NullTranslations()

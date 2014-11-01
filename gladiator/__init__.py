@@ -1,7 +1,7 @@
 from .core import validate
 from .validators import required, format_email, length_max, type_, value_max
 
-__version__ = "0.1"
+__version__ = "0.2"
 
 
 def get_version():
