@@ -13,7 +13,7 @@ setup(
     name='Gladiator',
     version=get_version(),
     url='https://github.com/laco/gladiator',
-    download_url='https://github.com/laco/gladiator/tarball/0.1',
+    download_url='https://github.com/laco/gladiator/tarball/' + get_version(),
     license='BSD',
     author='László Andrási',
     author_email='mail@laszloandrasi.com',
