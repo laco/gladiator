@@ -38,9 +38,10 @@ class ValidationResult(object):
 
     def _error_msg(self):
         _ctx = {}
+        gettext = self.ctx['trans'].gettext
         _ctx.update(self.ctx)
         _ctx.update(self.msg_ctx)
-        return str(self.msg).format(**_ctx)
+        return str(gettext(self.msg)).format(**_ctx)
 
     def _error_list(self):
         err_list = []

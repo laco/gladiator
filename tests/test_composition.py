@@ -24,14 +24,12 @@ def test_simple_composition():
     }
 
     success_result = validate(
-        test_obj,
         [('key1', always_true),
-         ('key2', always_true)]
+         ('key2', always_true)], test_obj
     )
     failure_result = validate(
-        test_obj,
         [('key1', always_true),
-         ('key2', always_false)]
+         ('key2', always_false)], test_obj
     )
     assert bool(success_result) is True
     assert bool(failure_result) is False

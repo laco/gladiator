@@ -14,14 +14,17 @@ default_validation_ctx = {
 }
 
 
-def validate(validator, obj, selector=None, ctx=None):
-    ctx = ctx or default_validation_ctx.copy()
+def validate(validator, obj, selector=None, ctx=None, **kw):
+    _ctx = default_validation_ctx.copy()
+    _ctx.update(ctx or {})
+    _ctx.update(kw)
+    
     selector = selector or []
-
+    
     if callable(validator):
-        return _primitive_validate(validator, obj, selector, ctx)
+        return _primitive_validate(validator, obj, selector, _ctx)
     elif isinstance(validator, (list, tuple)):
-        return _composite_validate(validator, obj, selector, ctx)
+        return _composite_validate(validator, obj, selector, _ctx)
 
 
 def _primitive_validate(validator, obj, selector, ctx):
