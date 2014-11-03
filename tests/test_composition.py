@@ -44,21 +44,19 @@ def test_multilevel_composition():
     }
 
     success1_result = validate(
-        test_obj,
         [
             ('key1', always_true),
             always_true,
             ('key2', always_true),
             always_true
-        ])
+        ], test_obj)
 
     success2_result = validate(
-        test_obj,
         [
             ('key1', always_true, ('nested_key', always_true, always_true)),
             ('key2', always_true),
             always_true
-        ])
+        ], test_obj)
 
     assert bool(success1_result) is True
     assert bool(success2_result) is True
@@ -71,7 +69,5 @@ def test_values_exists():
         'key3': None
     }
     result = validate(
-        test_obj,
-        (('key1', not_none), ('key2', not_none), ('key3', is_none))
-    )
+        (('key1', not_none), ('key2', not_none), ('key3', is_none)), test_obj)
     assert bool(result) is True

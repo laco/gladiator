@@ -1,105 +1,80 @@
 from logging import getLogger
 from gettext import NullTranslations
 
+from .commons import Success, Failure
+
 
 logger = getLogger(__name__)
 
 
 default_validation_ctx = {
-    '_trans': NullTranslations()
+    'trans': NullTranslations(),
+    'err_msgs': {
+    }
 }
 
 
-class ValidationResult(object):
-    def __init__(self, obj, validator, ctx, selector, result, **kw):
-        self.obj = obj
-        self.validator = validator
-        self.ctx = ctx
-        self.selector = selector
-        self.result = result
-        self.kw = kw
-
-    def __bool__(self):
-        raise NotImplemented
-    
-    @property
-    def success(self):
-        return bool(self)
-    
-    @property
-    def errors(self):
-        if self.is_primitive():
-            return self._primitive_errors()
-        elif self.is_composite():
-            return self._composite_errors()
-
-    def is_primitive(self):
-        return callable(self.validator)
-    
-    def is_composite(self):
-        return isinstance(self.validator, (list, tuple))
-
-    def _primitive_errors(self):
-        if not self.success:
-            return (self.selector, self.result.get(1, ''))
-
-    def _composite_errors(self):
-        if not self.sucess:
-            return (self.selector, [r.errors for r in self.result])
-
-
-class Success(ValidationResult):
-
-    def __bool__(self):
-        return True
-
-
-class Failure(ValidationResult):
-
-    def __bool__(self):
-        return False
-
-
-def validate(obj, validator, ctx=None, selector=None):
+def validate(validator, obj, selector=None, ctx=None):
     ctx = ctx or default_validation_ctx.copy()
     selector = selector or []
 
-
     if callable(validator):
-        return _primitive_validate(obj, validator, ctx, selector)
+        return _primitive_validate(validator, obj, selector, ctx)
     elif isinstance(validator, (list, tuple)):
-        return _composite_validate(obj, validator, ctx, selector)
+        return _composite_validate(validator, obj, selector, ctx)
 
 
-def _primitive_validate(obj, validator, ctx, selector):
-    print(selector, validator.__name__)
-    result = validator(obj, ctx=ctx, selector=selector)
+def _primitive_validate(validator, obj, selector, ctx):
+    _ret = validator(obj, selector=selector, ctx=ctx)
+    result, msg, msg_ctx = _parse_primitive_validator_ret(_ret)
     ret_cls = Success if result is True else Failure
-    return ret_cls(**locals())
+    return ret_cls(
+        type_='primitive',
+        validator=validator,
+        obj=obj,
+        selector=selector,
+        ctx=ctx,
+        result=result,
+        msg=msg,
+        msg_ctx=msg_ctx)
 
 
-def _composite_validate(obj, validator, ctx, selector):
+def _parse_primitive_validator_ret(ret_):
+    if isinstance(ret_, tuple):
+        if len(ret_) == 2:
+            result, msg, msg_ctx = ret_[0], ret_[1], {}
+        elif len(ret_) == 3:
+            result, msg, msg_ctx = ret_
+    elif isinstance(ret_, bool):
+        result, msg, msg_ctx = ret_, None, {}
+    return result, msg, msg_ctx
+
+
+def _composite_validate(validator, obj, selector, ctx):
     def _has_selector(validator):
         return len(validator) >= 1 and isinstance(validator[0], str)
 
-    def _apply_selector(obj, selector):
+    def _apply_selector(obj, selector_str, current_selector):
         if isinstance(obj, dict):
-            return obj.get(selector, None)
+            return [(current_selector + [selector_str], obj.get(selector_str, None))]
         else:
-            return getattr(obj, selector, None)
-
-    if _has_selector(validator):
-        _selector, _validators = selector + [validator[0]], validator[1:]
-        _obj = _apply_selector(obj, _selector[-1])
-    else:
-        _selector, _validators, _obj = selector, validator, obj
-    result = [validate(_obj, v, ctx, _selector) for v in _validators]
-    ret_cls = Success if all(result) else Failure
+            return [(current_selector + [selector_str], getattr(obj, selector_str, None))]
     
+    if _has_selector(validator):
+        results = [
+            validate(v, _obj, _selector, ctx)
+            for v in validator[1:]
+            for _selector, _obj in _apply_selector(obj, validator[0], selector)
+        ]
+    else:
+        results = [validate(v, obj, selector, ctx) for v in validator]
+    
+    ret_cls = Success if all(results) else Failure
     return ret_cls(
-        obj=_obj,
+        type_='composite',
         validator=validator,
+        obj=obj,
+        selector=selector,
         ctx=ctx,
-        result=result,
-        selector=selector
+        results=results,
     )

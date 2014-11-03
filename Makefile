@@ -1,6 +1,7 @@
 CURRENT_VERSION=$(shell python3 -c "from gladiator import get_version; print(get_version())")
 NEXT_VERSION=$(shell python3 -c "from gladiator import next_version; print(next_version())")
 
+
 build:
 	python3 setup.py sdist
 
@@ -17,8 +18,19 @@ inc_version:
 	echo "New vesion is: $(NEXT_VERSION)"
 
 git_tag:
-	git tag $$(cat VERSION)
+	git tag $(CURRENT_VERSION)
 
+pypi_upload:
+	python3 setup.py sdist upload -r pypi
+
+pypi_register:
+	python3 setup.py register -r pypi
+
+pypitest_upload:
+	python3 setup.py sdist upload -r pypitest
+
+pypitest_register:
+	python3 setup.py register -r pypitest
 
 release: clean test inv_version build
 	echo "1. runnint tests"
