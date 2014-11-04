@@ -1,6 +1,12 @@
 from .utils import selector_as_string
 
 
+class ValidatorType(object):
+    primitive = 'primitive'
+    composite = 'composite'
+    unknown = 'unknown'
+
+
 class ValidationResult(object):
     def __init__(self, type_, validator, obj, selector, ctx, **kw):
         self.type_ = type_

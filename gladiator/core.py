@@ -3,7 +3,7 @@ import sys
 from uuid import uuid4
 from gettext import NullTranslations
 from .utils import selector_as_string
-from .commons import Success, Failure, Skip
+from .commons import ValidatorType, Success, Failure, Skip
 
 
 # logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
@@ -25,9 +25,9 @@ def validate(validator, obj, selector=None, ctx=None, **kw):
 
     if _lazy_and_already_failed(ctx, selector):
         result = _skip_validate(validator, obj, selector, ctx)
-    elif type_ == 'primitive':
+    elif type_ == ValidatorType.primitive:
         result = _primitive_validate(validator, obj, selector, ctx)
-    elif type_ == 'composite':
+    elif type_ == ValidatorType.composite:
         result = _composite_validate(validator, obj, selector, ctx)
     
     if result.success is False:
@@ -36,7 +36,7 @@ def validate(validator, obj, selector=None, ctx=None, **kw):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug(' {id} {vname} on object {obj} (selector={selector}) result: {result}'.format(
             id=ctx['uuid'],
-            vname=validator.__name__ if type_ == 'primitive' else 'composite-{}'.format(id(validator)),
+            vname=validator.__name__ if type_ == ValidatorType.primitive else 'composite-{}'.format(id(validator)),
             obj=str(obj),
             selector=selector_as_string(selector),
             result=result.__class__.__name__
@@ -64,11 +64,11 @@ def _init_ctx(ctx, **kw):
 
 def _detect_validator_type(validator):
     if callable(validator):
-        return 'primitive'
+        return ValidatorType.primitive
     elif isinstance(validator, (list, tuple)):
-        return 'composite'
+        return ValidatorType.composite
     else:
-        return 'unknown'
+        return ValidatorType.unknown
 
 
 def _skip_validate(validator, obj, selector, ctx):
@@ -96,7 +96,7 @@ def _primitive_validate(validator, obj, selector, ctx):
     result, msg, msg_ctx = _parse_primitive_validator_ret(_ret)
     ret_cls = Success if result is True else Failure
     return ret_cls(
-        type_='primitive',
+        type_=ValidatorType.primitive,
         validator=validator,
         obj=obj,
         selector=selector,
@@ -131,7 +131,7 @@ def _composite_validate(validator, obj, selector, ctx):
     
     ret_cls = Success if all(results) else Failure
     return ret_cls(
-        type_='composite',
+        type_=ValidatorType.composite,
         validator=validator,
         obj=obj,
         selector=selector,
