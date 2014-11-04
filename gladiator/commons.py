@@ -9,11 +9,11 @@ class ValidationResult(object):
         self.selector = selector
         self.ctx = ctx
         if type_ == 'primitive':
-            self.result = kw.pop('result')
-            self.msg = kw.pop('msg')
-            self.msg_ctx = kw.pop('msg_ctx')
+            self.result = kw.pop('result', None)
+            self.msg = kw.pop('msg', None)
+            self.msg_ctx = kw.pop('msg_ctx', {})
         elif type_ == 'composite':
-            self.results = kw.pop('results')
+            self.results = kw.pop('results', [])
         self.kw = kw
 
     def __bool__(self):
@@ -61,6 +61,12 @@ class Success(ValidationResult):
 
 
 class Failure(ValidationResult):
+
+    def __bool__(self):
+        return False
+
+
+class Skip(ValidationResult):
 
     def __bool__(self):
         return False

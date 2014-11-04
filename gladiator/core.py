@@ -1,13 +1,17 @@
-from logging import getLogger
+import logging
+import sys
+from uuid import uuid4
 from gettext import NullTranslations
+from .utils import selector_as_string
+from .commons import Success, Failure, Skip
 
-from .commons import Success, Failure
 
-
-logger = getLogger(__name__)
+# logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
+logger = logging.getLogger(__name__)
 
 
 default_validation_ctx = {
+    'lazy': True,
     'trans': NullTranslations(),
     'err_msgs': {
     }
@@ -15,19 +19,79 @@ default_validation_ctx = {
 
 
 def validate(validator, obj, selector=None, ctx=None, **kw):
+    ctx = _init_ctx(ctx, **kw)
+    selector = selector or []
+    type_ = _detect_validator_type(validator)
+
+    if _lazy_and_already_failed(ctx, selector):
+        result = _skip_validate(validator, obj, selector, ctx)
+    elif type_ == 'primitive':
+        result = _primitive_validate(validator, obj, selector, ctx)
+    elif type_ == 'composite':
+        result = _composite_validate(validator, obj, selector, ctx)
+    
+    if result.success is False:
+        _lazy_register_failed(ctx, selector)
+    
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug(' {id} {vname} on object {obj} (selector={selector}) result: {result}'.format(
+            id=ctx['uuid'],
+            vname=validator.__name__ if type_ == 'primitive' else 'composite-{}'.format(id(validator)),
+            obj=str(obj),
+            selector=selector_as_string(selector),
+            result=result.__class__.__name__
+        ))
+    
+    return result
+
+
+def _lazy_and_already_failed(ctx, selector):
+    return ctx.get('lazy', True) and selector_as_string(selector) in ctx.get('_failed_selectors', [])
+
+
+def _lazy_register_failed(ctx, selector):
+    if selector not in ctx.get('_failed_selectors', []):
+        ctx.setdefault('_failed_selectors', []).append(selector_as_string(selector))
+
+
+def _init_ctx(ctx, **kw):
     _ctx = default_validation_ctx.copy()
     _ctx.update(ctx or {})
     _ctx.update(kw)
-    
-    selector = selector or []
-    
+    _ctx.setdefault('uuid', uuid4().hex)
+    return _ctx
+
+
+def _detect_validator_type(validator):
     if callable(validator):
-        return _primitive_validate(validator, obj, selector, _ctx)
+        return 'primitive'
     elif isinstance(validator, (list, tuple)):
-        return _composite_validate(validator, obj, selector, _ctx)
+        return 'composite'
+    else:
+        return 'unknown'
+
+
+def _skip_validate(validator, obj, selector, ctx):
+    return Skip(
+        type_=_detect_validator_type(validator),
+        validator=validator,
+        obj=obj,
+        selector=selector,
+        ctx=ctx)
 
 
 def _primitive_validate(validator, obj, selector, ctx):
+
+    def _parse_primitive_validator_ret(ret_):
+        if isinstance(ret_, tuple):
+            if len(ret_) == 2:
+                result, msg, msg_ctx = ret_[0], ret_[1], {}
+            elif len(ret_) == 3:
+                result, msg, msg_ctx = ret_
+        elif isinstance(ret_, bool):
+            result, msg, msg_ctx = ret_, None, {}
+        return result, msg, msg_ctx
+
     _ret = validator(obj, selector=selector, ctx=ctx)
     result, msg, msg_ctx = _parse_primitive_validator_ret(_ret)
     ret_cls = Success if result is True else Failure
@@ -40,17 +104,6 @@ def _primitive_validate(validator, obj, selector, ctx):
         result=result,
         msg=msg,
         msg_ctx=msg_ctx)
-
-
-def _parse_primitive_validator_ret(ret_):
-    if isinstance(ret_, tuple):
-        if len(ret_) == 2:
-            result, msg, msg_ctx = ret_[0], ret_[1], {}
-        elif len(ret_) == 3:
-            result, msg, msg_ctx = ret_
-    elif isinstance(ret_, bool):
-        result, msg, msg_ctx = ret_, None, {}
-    return result, msg, msg_ctx
 
 
 def _composite_validate(validator, obj, selector, ctx):
