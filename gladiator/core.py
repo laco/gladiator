@@ -111,7 +111,9 @@ def _composite_validate(validator, obj, selector, ctx):
         return len(validator) >= 1 and isinstance(validator[0], str)
 
     def _apply_selector(obj, selector_str, current_selector):
-        if selector_str == '@all':
+        if selector_str in ctx.get('custom_selectors', {}):
+            return ctx['custom_selectors'][selector_str](obj, current_selector)
+        elif selector_str == '@all':
             return [(current_selector + [index], value) for index, value in enumerate(obj or [])]
         elif selector_str == '@first':
             return [(current_selector + [0], obj.get(0))]
