@@ -22,6 +22,9 @@ class ValidationResult(object):
             self.results = kw.pop('results', [])
         self.kw = kw
 
+    def __nonzero__(self):
+        return self.__bool__()
+
     def __bool__(self):
         raise NotImplemented
     
@@ -53,12 +56,23 @@ class ValidationResult(object):
         err_list = []
         for r in self.results:
             if not r.success:
-                if r.type_ == 'primitive':
+                if r.type_ == ValidatorType.primitive:
                     err_list.append((selector_as_string(r.selector), r.error))
-                elif r.type_ == 'composite':
+                elif r.type_ == ValidatorType.composite:
                     err_list += r._error_list()
         return err_list
         
+    def __repr__(self):
+        if self.type_ == ValidatorType.primitive:
+            return "{0}[{1}]".format(
+                self.__class__.__name__,
+                selector_as_string(self.selector))
+        elif self.type_ == ValidatorType.composite:
+            return '{0}({1}{2})'.format(
+                self.__class__.__name__,
+                '',
+                ', '.join([repr(r) for r in self.results]))
+
 
 class Success(ValidationResult):
 
