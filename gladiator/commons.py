@@ -46,7 +46,9 @@ class ValidationResult(object):
                 return []
 
     def _error_msg(self):
-        _ctx = {}
+        _ctx = {
+            'selector': selector_as_string(self.selector),
+        }
         gettext = self.ctx['trans'].gettext
         _ctx.update(self.ctx)
         _ctx.update(self.msg_ctx)
@@ -55,7 +57,7 @@ class ValidationResult(object):
     def _error_list(self):
         err_list = []
         for r in self.results:
-            if not r.success:
+            if not r.success and isinstance(r, Failure):
                 if r.type_ == ValidatorType.primitive:
                     err_list.append((selector_as_string(r.selector), r.error))
                 elif r.type_ == ValidatorType.composite:

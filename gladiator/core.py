@@ -19,7 +19,8 @@ default_validation_ctx = {
 
 
 def validate(validator, obj, selector=None, ctx=None, **kw):
-    ctx = _init_ctx(ctx, **kw)
+    ctx = _init_once_ctx(ctx, **kw)
+
     selector = selector or []
     type_ = _detect_validator_type(validator)
 
@@ -30,7 +31,7 @@ def validate(validator, obj, selector=None, ctx=None, **kw):
     elif type_ == ValidatorType.composite:
         result = _composite_validate(validator, obj, selector, ctx)
     
-    if result.success is False:
+    if result.success is False and type_ == ValidatorType.primitive:
         _lazy_register_failed(ctx, selector)
     
     if logger.isEnabledFor(logging.DEBUG):
@@ -41,7 +42,6 @@ def validate(validator, obj, selector=None, ctx=None, **kw):
             selector=selector_as_string(selector),
             result=result.__class__.__name__
         ))
-    
     return result
 
 
@@ -54,12 +54,16 @@ def _lazy_register_failed(ctx, selector):
         ctx.setdefault('_failed_selectors', []).append(selector_as_string(selector))
 
 
-def _init_ctx(ctx, **kw):
-    _ctx = default_validation_ctx.copy()
-    _ctx.update(ctx or {})
-    _ctx.update(kw)
-    _ctx.setdefault('uuid', uuid4().hex)
-    return _ctx
+def _init_once_ctx(ctx, **kw):
+    if ctx is None or ctx.get('__initialized', None) is None:
+        _ctx = default_validation_ctx.copy()
+        _ctx.update(ctx or {})
+        _ctx.update(kw)
+        _ctx.setdefault('uuid', uuid4().hex)
+        _ctx['__initialized'] = True
+        return _ctx
+    else:
+        return ctx
 
 
 def _detect_validator_type(validator):

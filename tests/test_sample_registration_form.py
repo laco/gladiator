@@ -18,7 +18,7 @@ invalid_test_data = {
     'email': 'missingatcharacter.com',
     'pw': '',
     'name': 'Test Username',
-    'birth_year': 'not number 1984'
+    'birth_year': 'not number!!!'
 }
 
 
@@ -33,13 +33,13 @@ registration_form_validator = (
     ('email', gl.required, gl.format_email),
     ('pw', gl.required, gl.length_min(5)),
     ('name', gl.required, gl.type_(str)),
-    ('birth_year', gl.required, gl.type_(int), gl.value_max(2014 - 18)),
+    ('birth_year', gl.required, gl.type_(int), gl.lt((2014 - 18))),
     custom_validator,
 )
 
 
 def test_registration_form():
-    validator_func = partial(gl.validate, registration_form_validator, ctx={'custom_variable': 'exists'})
+    validator_func = partial(gl.validate, registration_form_validator, ctx={'custom_variable': 'exists', 'lazy': True})
     
     success_result = validator_func(valid_test_data)
     failure_result = validator_func(invalid_test_data)
@@ -47,4 +47,4 @@ def test_registration_form():
     assert success_result.success is True
     assert success_result.errors == []
     assert failure_result.success is False
-    assert failure_result.errors != []
+    assert len(failure_result.errors) == 3  # lazyness!!

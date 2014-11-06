@@ -1,5 +1,5 @@
 from .core import validate
-from .validators import required, format_email, length_max, length_min, length, type_, value_max
+from .validators import required, format_email, length_max, length_min, length, type_, value_max, lt, gt, eq, ne, gte, lte
 
 __version__ = "0.6"
 
