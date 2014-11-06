@@ -1,5 +1,5 @@
 from .core import validate
-from .validators import required, format_email, length_max, length_min, length, type_, value_max, lt, gt, eq, ne, gte, lte
+from .validators import required, format_email, length_max, length_min, length, type_, lt, gt, eq, ne, gte, lte, _value
 
 __version__ = "0.6"
 
@@ -14,4 +14,18 @@ def next_version():
     return '.'.join(_v)
 
 
-__all__ = ['validate', 'required', 'format_email', 'length_max', 'type_', 'value_max']
+__all__ = ['validate',
+           'required',
+           'format_email',
+           'length_max',
+           'length_min',
+           'length',
+           'type_',
+           '_value',
+           'lt',
+           'gt',
+           'eq',
+           'ne',
+           'gte',
+           'lte',
+           'true_if_empty']

@@ -71,22 +71,9 @@ def type_(t):
     return _validator
 
 
-def value_max(v):
-    @true_if_empty
-    @wraps(value_max)
-    def _validator(obj, selector, ctx):
-        try:
-            if obj <= v:
-                return True
-            else:
-                return False, 'Max value Error'
-        except TypeError as e:
-            return False, str(e)
-    return _validator
-
-
 def _value(value, name, attrib, err_msg):
 
+    @true_if_empty
     def _validator(obj, selector, ctx):
         if hasattr(obj, attrib):
             o = getattr(obj, attrib)
