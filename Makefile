@@ -1,5 +1,5 @@
 CURRENT_VERSION=$(shell python3 -c "from gladiator import get_version; print(get_version())")
-NEXT_VERSION=$(shell python3 -c "from gladiator import next_version; print(next_version())")
+# NEXT_VERSION=$(shell python3 -c "from gladiator import next_version; print(next_version())")
 
 
 build:
@@ -13,9 +13,9 @@ clean:
 	rm -rf Gladiator.egg-info
 	rm -f dist/*.tar.gz
 
-inc_version:
-	perl -i -pe 's/$(CURRENT_VERSION)/$(NEXT_VERSION)/' gladiator/__init__.py
-	echo "New vesion is: $(NEXT_VERSION)"
+# inc_version:
+# 	perl -i -pe 's/$(CURRENT_VERSION)/$(NEXT_VERSION)/' gladiator/__init__.py
+# 	echo "New vesion is: $(NEXT_VERSION)"
 
 git_tag:
 	git tag $(CURRENT_VERSION)
@@ -32,7 +32,7 @@ pypitest_upload:
 pypitest_register:
 	python3 setup.py register -r pypitest
 
-release: clean test inv_version build
+release: clean test build
 	echo "1. runnint tests"
 	echo "2. Change version"
 	echo "3. commit and create tag"

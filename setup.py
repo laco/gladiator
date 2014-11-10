@@ -1,7 +1,18 @@
 # coding: utf-8
 
 from setuptools import setup
-from gladiator import get_version
+
+__version__ = "0.6"
+
+
+def get_version():
+    return __version__
+
+
+def next_version():
+    _v = __version__.split('.')
+    _v[-1] = str(int(_v[-1]) + 1)
+    return '.'.join(_v)
 
 
 def read_file(f):

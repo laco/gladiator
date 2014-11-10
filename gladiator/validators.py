@@ -40,7 +40,7 @@ def length(minimum, maximum):
     @wraps(length)
     def _validator(obj, selector, ctx):
         if minimum is not None and maximum is not None:
-            if not len(obj) >= minimum and len(obj) <= maximum:
+            if not (len(obj) >= minimum and len(obj) <= maximum):
                 return False, _('Must be between {minimum} and {maximum}'), _msg_ctx
         elif minimum is None and maximum is not None:
             if not len(obj) <= maximum:
