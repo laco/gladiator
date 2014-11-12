@@ -26,11 +26,6 @@ def required(obj, selector, ctx):
     return (False, _('missing value.')) if obj in FALSE_VALUES else True
 
 
-@true_if_empty
-def format_email(obj, selector, ctx):
-    return (False, _('bad email format')) if '@' not in obj else True
-
-
 def length(minimum, maximum):
     _msg_ctx = {
         'minimum': minimum,
@@ -90,6 +85,7 @@ def regex_(pattern, pattern_name=None):
 def _value(value, name, attrib, err_msg):
 
     @true_if_empty
+    @wraps(_value)
     def _validator(obj, selector, ctx):
         if hasattr(obj, attrib):
             o = getattr(obj, attrib)
@@ -105,7 +101,60 @@ def _value(value, name, attrib, err_msg):
     _validator.__name__ = name
     return _validator
 
-                
+
+def in_(lst):
+    
+    lst = lst or []
+
+    @true_if_empty
+    @wraps(in_)
+    def _validator(obj, selector, ctx):
+        return True if obj in lst else False, _('{obj} not in options: {lst}'), {'lst': lst}
+    return _validator
+
+
+# email regex rules
+WSP = r'[ \t]'                                       # see 2.2.2. Structured Header Field Bodies
+CRLF = r'(?:\r\n)'                                   # see 2.2.3. Long Header Fields
+NO_WS_CTL = r'\x01-\x08\x0b\x0c\x0f-\x1f\x7f'        # see 3.2.1. Primitive Tokens
+QUOTED_PAIR = r'(?:\\.)'                             # see 3.2.2. Quoted characters
+FWS = r'(?:(?:' + WSP + r'*' + CRLF + r')?' + \
+    WSP + r'+)'                                    # see 3.2.3. Folding white space and comments
+CTEXT = r'[' + NO_WS_CTL + \
+    r'\x21-\x27\x2a-\x5b\x5d-\x7e]'              # see 3.2.3
+CCONTENT = r'(?:' + CTEXT + r'|' + \
+    QUOTED_PAIR + r')'                        # see 3.2.3 (NB: The RFC includes COMMENT here
+# as well, but that would be circular.)
+COMMENT = r'\((?:' + FWS + r'?' + CCONTENT + \
+    r')*' + FWS + r'?\)'                       # see 3.2.3
+CFWS = r'(?:' + FWS + r'?' + COMMENT + ')*(?:' + \
+    FWS + '?' + COMMENT + '|' + FWS + ')'         # see 3.2.3
+ATEXT = r'[\w!#$%&\'\*\+\-/=\?\^`\{\|\}~]'            # see 3.2.4. Atom
+ATOM = CFWS + r'?' + ATEXT + r'+' + CFWS + r'?'       # see 3.2.4
+DOT_ATOM_TEXT = ATEXT + r'+(?:\.' + ATEXT + r'+)*'    # see 3.2.4
+DOT_ATOM = CFWS + r'?' + DOT_ATOM_TEXT + CFWS + r'?'  # see 3.2.4
+QTEXT = r'[' + NO_WS_CTL + \
+    r'\x21\x23-\x5b\x5d-\x7e]'                   # see 3.2.5. Quoted strings
+QCONTENT = r'(?:' + QTEXT + r'|' + \
+    QUOTED_PAIR + r')'                        # see 3.2.5
+QUOTED_STRING = CFWS + r'?' + r'"(?:' + FWS + \
+    r'?' + QCONTENT + r')*' + FWS + \
+    r'?' + r'"' + CFWS + r'?'
+LOCAL_PART = r'(?:' + DOT_ATOM + r'|' + \
+    QUOTED_STRING + r')'                    # see 3.4.1. Addr-spec specification
+DTEXT = r'[' + NO_WS_CTL + r'\x21-\x5a\x5e-\x7e]'    # see 3.4.1
+DCONTENT = r'(?:' + DTEXT + r'|' + \
+    QUOTED_PAIR + r')'                        # see 3.4.1
+DOMAIN_LITERAL = CFWS + r'?' + r'\[' + \
+    r'(?:' + FWS + r'?' + DCONTENT + \
+    r')*' + FWS + r'?\]' + CFWS + r'?'  # see 3.4.1
+DOMAIN = r'(?:' + DOT_ATOM + r'|' + \
+    DOMAIN_LITERAL + r')'                       # see 3.4.1
+ADDR_SPEC = LOCAL_PART + r'@' + DOMAIN               # see 3.4.1
+VALID_ADDRESS_REGEXP = re.compile('^' + ADDR_SPEC + '$')
+format_email = regex_(VALID_ADDRESS_REGEXP, 'email')
+
+
 lt = partial(_value, name='lt', attrib='__lt__', err_msg='{selector} is not less then {value}.')
 gt = partial(_value, name='gt', attrib='__gt__', err_msg='{selector} is not greater then {value}.')
 eq = partial(_value, name='eq', attrib='__eq__', err_msg='{selector} is not equal to {value}.')
