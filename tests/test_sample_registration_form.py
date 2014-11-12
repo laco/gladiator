@@ -22,7 +22,7 @@ invalid_test_data = {
 }
 
 
-def custom_validator(obj, ctx, selector):
+def custom_validator(obj, selector, ctx):
     if 'custom_variable' in ctx:
         return True
     else:
