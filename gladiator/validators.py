@@ -67,7 +67,7 @@ def type_(t):
     @wraps(type_)
     def _validator(obj, selector, ctx):
         if not isinstance(obj, t):
-            return False, _('Not a {type}'), {'type': t}
+            return False, _('Object {otype} is not a {type}'), {'type': t, 'otype': type(obj)}
         return True
     return _validator
 
