@@ -1,3 +1,4 @@
+import re
 from functools import wraps, partial
 from .utils import dummy_gettext as _
 
@@ -68,6 +69,21 @@ def type_(t):
         if not isinstance(obj, t):
             return False, _('Not a {type}'), {'type': t}
         return True
+    return _validator
+
+
+def regex_(pattern, pattern_name=None):
+    if isinstance(pattern, str):
+        _pattern = re.compile(pattern)
+    else:
+        _pattern = pattern
+
+    @true_if_empty
+    @wraps(regex_)
+    def _validator(obj, selector, ctx):
+        if _pattern.fullmatch(obj):
+            return True
+        return False, _('Value not match {pattern_name} format.'), {'pattern': pattern, 'pattern_name': pattern_name or pattern}
     return _validator
 
 

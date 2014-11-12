@@ -1,5 +1,5 @@
 from .core import validate
-from .validators import required, format_email, length_max, length_min, length, type_, lt, gt, eq, ne, gte, lte, _value
+from .validators import required, format_email, length_max, length_min, length, type_, lt, gt, eq, ne, gte, lte, _value, regex_
 from .decorators import validate_fn
 from .utils import dummy_gettext, selector_as_string
 
@@ -12,6 +12,7 @@ __all__ = ['validate',
            'length_min',
            'length',
            'type_',
+           'regex_',
            '_value',
            'lt',
            'gt',

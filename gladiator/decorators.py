@@ -3,12 +3,12 @@ from inspect import signature, _empty, isclass, getmro
 from .core import validate
 
 
-def validate_fn(validator=None, on_failure=None, ctx=None):
+def validate_fn(validator=None, on_failure=None, vctx=None):
 
     def decorator(fn):
         @wraps(fn)
         def inner_fn(*args, **kwargs):
-            vresult = _validate_fn_params(fn, validator, ctx, *args, **kwargs)
+            vresult = _validate_fn_params(fn, validator, vctx, *args, **kwargs)
             if vresult.success:
                 return fn(*args, **kwargs)
             else:
@@ -22,7 +22,7 @@ def _annotation_is_validator(param):
         (callable(param.annotation) or isinstance(param.annotation, (tuple, list)))
 
 
-def _validate_fn_params(fn, validator=None, ctx=None, *args, **kwargs):
+def _validate_fn_params(fn, validator=None, vctx=None, *args, **kwargs):
     sig = signature(fn)
     ba = sig.bind(*args, **kwargs)
     va = list(validator or [])
@@ -34,7 +34,7 @@ def _validate_fn_params(fn, validator=None, ctx=None, *args, **kwargs):
                 param.name,  # selector
                 param.annotation  # validation rules
             ))
-    return validate(va, ba.arguments, ctx=ctx)
+    return validate(va, ba.arguments, ctx=vctx)
 
 
 def _handle_on_failure(vresult, on_failure, fn, *args, **kwargs):
