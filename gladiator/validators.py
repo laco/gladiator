@@ -3,12 +3,12 @@ from functools import wraps, partial
 from .utils import dummy_gettext as _
 
 
-FALSE_VALUES = (None, '', 0, False)
+FALSE_VALUES = (None, '', False)
 
 
 def true_if_empty(func):
     """If you put this decorator on a validator
-    the validator never fail if the value is missing.
+    the validator never fail if tho value is missing.
     
     If the value is present (not None), the validator will run as expected.
     This is useful, if the key is optional in a dictionary.
@@ -109,7 +109,7 @@ def in_(lst):
     @true_if_empty
     @wraps(in_)
     def _validator(obj, selector, ctx):
-        return True if obj in lst else False, _('{obj} not in options: {lst}'), {'lst': lst}
+        return True if obj in lst else False, _('{obj} not in options: {lst}'), {'lst': lst, 'obj': obj}
     return _validator
 
 
