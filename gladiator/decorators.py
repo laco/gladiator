@@ -25,7 +25,7 @@ def _annotation_is_validator(param):
 def _validate_fn_params(fn, validator=None, vctx=None, *args, **kwargs):
     sig = signature(fn)
     ba = sig.bind(*args, **kwargs)
-    va = list(validator or [])
+    va = []
     for param in sig.parameters.values():
         if param.name not in ba.arguments:
             ba.arguments[param.name] = param.default
@@ -34,6 +34,8 @@ def _validate_fn_params(fn, validator=None, vctx=None, *args, **kwargs):
                 param.name,  # selector
                 param.annotation  # validation rules
             ))
+    if validator is not None:
+        va = va + list(validator)
     return validate(va, ba.arguments, ctx=vctx)
 
 
