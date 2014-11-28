@@ -22,6 +22,11 @@ def true_if_empty(func):
     return _validator
 
 
+def skip_on_fail(func):
+    func._lazy = True
+    return func
+
+
 def required(obj, selector, ctx):
     return (False, _('missing value.')) if obj in FALSE_VALUES else True
 

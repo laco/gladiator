@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 default_validation_ctx = {
     'lazy': True,
+    'validation_failed': False,
     'trans': NullTranslations(),
     'err_msgs': {
     }
@@ -24,7 +25,7 @@ def validate(validator, obj, selector=None, ctx=None, **kw):
     selector = selector or []
     type_ = _detect_validator_type(validator)
 
-    if _lazy_and_already_failed(ctx, selector):
+    if _lazy_and_already_failed(ctx, selector, validator):
         result = _skip_validate(validator, obj, selector, ctx)
     elif type_ == ValidatorType.primitive:
         result = _primitive_validate(validator, obj, selector, ctx)
@@ -45,11 +46,15 @@ def validate(validator, obj, selector=None, ctx=None, **kw):
     return result
 
 
-def _lazy_and_already_failed(ctx, selector):
-    return ctx.get('lazy', True) and selector_as_string(selector) in ctx.get('_failed_selectors', [])
+def _lazy_and_already_failed(ctx, selector, validator):
+    return (ctx.get('lazy', True) and
+            (
+                (selector_as_string(selector) in ctx.get('_failed_selectors', [])) or
+                (getattr(validator, '_lazy', False) and ctx.get('validation_failed', False))))
 
 
 def _lazy_register_failed(ctx, selector):
+    ctx['validation_failed'] = True
     if selector not in ctx.get('_failed_selectors', []):
         ctx.setdefault('_failed_selectors', []).append(selector_as_string(selector))
 
