@@ -29,7 +29,8 @@ def _validate_fn_params(fn, validator=None, vctx=None, *args, **kwargs):
     for param in sig.parameters.values():
         if param.name not in ba.arguments:
             ba.arguments[param.name] = param.default
-        if _annotation_is_validator(param):
+        if _annotation_is_validator(param) and ba.arguments[param.name] != param.default:
+            # validate only if called with not the default value
             va.append((
                 param.name,  # selector
                 param.annotation  # validation rules

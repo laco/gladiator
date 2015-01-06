@@ -117,11 +117,18 @@ def _primitive_validate(validator, obj, selector, ctx):
 
 def _composite_validate(validator, obj, selector, ctx):
     def _has_selector(validator):
-        return len(validator) >= 1 and isinstance(validator[0], str)
+        return len(validator) >= 1 and isinstance(validator[0], (str, int))
 
     def _apply_selector(obj, selector_str, current_selector):
         if selector_str in ctx.get('custom_selectors', {}):
             return ctx['custom_selectors'][selector_str](obj, current_selector)
+        elif isinstance(selector_str, int) and isinstance(obj, (tuple, list)):
+            try:
+                new_obj = obj[selector_str]
+            except IndexError:
+                new_obj = None
+            return [(current_selector + [str(selector_str)], new_obj)]
+
         elif selector_str == '@all':
             return [(current_selector + [index], value) for index, value in enumerate(obj or [])]
         elif selector_str == '@first':
