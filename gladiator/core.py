@@ -20,7 +20,7 @@ default_validation_ctx = {
 
 
 def validate(validator, obj, selector=None, ctx=None, **kw):
-    ctx = _init_once_ctx(ctx, **kw)
+    ctx = _init_once_ctx(ctx, obj, **kw)
 
     selector = selector or []
     type_ = _detect_validator_type(validator)
@@ -59,12 +59,13 @@ def _lazy_register_failed(ctx, selector):
         ctx.setdefault('_failed_selectors', []).append(selector_as_string(selector))
 
 
-def _init_once_ctx(ctx, **kw):
+def _init_once_ctx(ctx, obj, **kw):
     if ctx is None or ctx.get('__initialized', None) is None:
         _ctx = default_validation_ctx.copy()
         _ctx.update(ctx or {})
         _ctx.update(kw)
         _ctx.setdefault('uuid', uuid4().hex)
+        _ctx.setdefault('initial_obj', obj)
         _ctx['__initialized'] = True
         return _ctx
     else:
