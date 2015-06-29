@@ -31,10 +31,10 @@ def validate(validator, obj, selector=None, ctx=None, **kw):
         result = _primitive_validate(validator, obj, selector, ctx)
     elif type_ == ValidatorType.composite:
         result = _composite_validate(validator, obj, selector, ctx)
-    
+
     if result.success is False and type_ == ValidatorType.primitive:
         _lazy_register_failed(ctx, selector)
-    
+
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug(' {id} {vname} on object {obj} (selector={selector}) result: {result}'.format(
             id=ctx['uuid'],
@@ -133,12 +133,13 @@ def _composite_validate(validator, obj, selector, ctx):
         elif selector_str == '@all':
             return [(current_selector + [index], value) for index, value in enumerate(obj or [])]
         elif selector_str == '@first':
-            return [(current_selector + [0], obj.get(0))]
+            ret_selector = current_selector + [0]
+            return [(ret_selector, next(iter(obj), None))]
         elif isinstance(obj, dict):
             return [(current_selector + [selector_str], obj.get(selector_str, None))]
         else:
             return [(current_selector + [selector_str], getattr(obj, selector_str, None))]
-    
+
     if _has_selector(validator):
         results = [
             validate(v, _obj, _selector, ctx)
@@ -147,7 +148,7 @@ def _composite_validate(validator, obj, selector, ctx):
         ]
     else:
         results = [validate(v, obj, selector, ctx) for v in validator]
-    
+
     ret_cls = Success if all(results) else Failure
     return ret_cls(
         type_=ValidatorType.composite,

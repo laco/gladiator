@@ -29,3 +29,12 @@ def test_shopping_cart_with_valid_data():
 def test_shopping_cart_with_empty_data():
     result = gl.validate(validation_rules, {})
     assert result.success is False
+
+
+def test_shopping_cart_first_item():
+    validation_rules1 = (
+        ('items', gl.type_(list),
+         ('@first',
+          ('price', gl.eq(1.34)))))
+    result = gl.validate(validation_rules1, valid_test_data)
+    assert result.success is True
