@@ -3,7 +3,7 @@ from functools import wraps, partial
 from .utils import dummy_gettext as _
 
 
-FALSE_VALUES = (None, '', False)
+FALSE_VALUES = (None, '')
 
 
 def true_if_empty(func):

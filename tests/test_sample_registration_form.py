@@ -10,7 +10,9 @@ valid_test_data = {
     'email': 'test@example.com',
     'pw': 'password123',
     'name': 'Test Username',
-    'birth_year': 1984
+    'birth_year': 1984,
+    'is_email_validated': True,
+    'is_blocked': False
 }
 
 
@@ -18,7 +20,9 @@ invalid_test_data = {
     'email': 'missingatcharacter.com',
     'pw': '',
     'name': 'Test Username',
-    'birth_year': 'not number!!!'
+    'birth_year': 'not number!!!',
+    'is_email_validated': None,
+    # 'is_blocked' not included
 }
 
 
@@ -34,7 +38,9 @@ registration_form_validator = (
     ('pw', gl.required, gl.length_min(5)),
     ('name', gl.required, gl.type_(str)),
     ('birth_year', gl.required, gl.type_(int), gl.lt((2014 - 18))),
-    custom_validator,
+    ('is_email_validated', gl.required, gl.type_(bool)),
+    ('is_blocked', gl.required, gl.type_(bool)),
+    custom_validator
 )
 
 
@@ -47,4 +53,4 @@ def test_registration_form():
     assert success_result.success is True
     assert success_result.errors == []
     assert failure_result.success is False
-    assert len(failure_result.errors) == 3  # lazyness!!
+    assert len(failure_result.errors) == 5  # lazyness!!
