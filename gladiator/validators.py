@@ -164,5 +164,5 @@ lt = partial(_value, name='lt', attrib='__lt__', err_msg='{selector} is not less
 gt = partial(_value, name='gt', attrib='__gt__', err_msg='{selector} is not greater then {value}.')
 eq = partial(_value, name='eq', attrib='__eq__', err_msg='{selector} is not equal to {value}.')
 ne = partial(_value, name='ne', attrib='__ne__', err_msg='{selector} is equal to {value}.')
-lte = partial(_value, name='lte', attrib='__le__', err_msg='{selector is not less or equal to {value}.')
-gte = partial(_value, name='gte', attrib='__ge__', err_msg='{selector is not greater or equal to {value}.')
+lte = partial(_value, name='lte', attrib='__le__', err_msg='{selector} is not less or equal to {value}.')
+gte = partial(_value, name='gte', attrib='__ge__', err_msg='{selector} is not greater or equal to {value}.')
