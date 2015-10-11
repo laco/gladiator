@@ -9,7 +9,7 @@ FALSE_VALUES = (None, '')
 def true_if_empty(func):
     """If you put this decorator on a validator
     the validator never fail if tho value is missing.
-    
+
     If the value is present (not None), the validator will run as expected.
     This is useful, if the key is optional in a dictionary.
     """
@@ -28,7 +28,7 @@ def skip_on_fail(func):
 
 
 def required(obj, selector, ctx):
-    return (False, _('missing value.')) if obj in FALSE_VALUES else True
+    return (False, _('Missing value.')) if obj in FALSE_VALUES else True
 
 
 def length(minimum, maximum):
@@ -42,13 +42,13 @@ def length(minimum, maximum):
     def _validator(obj, selector, ctx):
         if minimum is not None and maximum is not None:
             if not (len(obj) >= minimum and len(obj) <= maximum):
-                return False, _('Must be between {minimum} and {maximum}'), _msg_ctx
+                return False, _('Must be between {minimum} and {maximum}.'), _msg_ctx
         elif minimum is None and maximum is not None:
             if not len(obj) <= maximum:
-                return False, _('Must be less then {maximum}'), _msg_ctx
+                return False, _('Must be less than {maximum}.'), _msg_ctx
         elif minimum is not None and maximum is None:
             if not len(obj) >= minimum:
-                return False, _('must be at least {minimum}'), _msg_ctx
+                return False, _('Must be at least {minimum}.'), _msg_ctx
         return True
     return _validator
 
@@ -67,7 +67,7 @@ def type_(t):
     @wraps(type_)
     def _validator(obj, selector, ctx):
         if not isinstance(obj, t):
-            return False, _('Object {otype} is not a {type}'), {'type': t, 'otype': type(obj)}
+            return False, _('Object is of {otype}. Must be of {type}.'), {'type': t, 'otype': type(obj)}
         return True
     return _validator
 
@@ -83,7 +83,7 @@ def regex_(pattern, pattern_name=None):
     def _validator(obj, selector, ctx):
         if _pattern.fullmatch(obj):
             return True
-        return False, _('Value not match {pattern_name} format.'), {'pattern': pattern, 'pattern_name': pattern_name or pattern}
+        return False, _("Value does not match '{pattern_name}' format."), {'pattern': pattern, 'pattern_name': pattern_name or pattern}
     return _validator
 
 
@@ -101,20 +101,20 @@ def _value(value, name, attrib, err_msg):
             if result is not True:
                 return False, err_msg, {'attrib': attrib, 'value': value, 'o': o, 'result': result}
             return True
-        return False, '{} member missing: {}'.format(obj, attrib)
+        return False, '{} member missing: {}.'.format(obj, attrib)
 
     _validator.__name__ = name
     return _validator
 
 
 def in_(lst):
-    
+
     lst = lst or []
 
     @true_if_empty
     @wraps(in_)
     def _validator(obj, selector, ctx):
-        return True if obj in lst else False, _('{obj} not in options: {lst}'), {'lst': lst, 'obj': obj}
+        return True if obj in lst else False, _('{obj} not in options: {lst}.'), {'lst': lst, 'obj': obj}
     return _validator
 
 
@@ -160,8 +160,8 @@ VALID_ADDRESS_REGEXP = re.compile('^' + ADDR_SPEC + '$')
 format_email = regex_(VALID_ADDRESS_REGEXP, 'email')
 
 
-lt = partial(_value, name='lt', attrib='__lt__', err_msg='{selector} is not less then {value}.')
-gt = partial(_value, name='gt', attrib='__gt__', err_msg='{selector} is not greater then {value}.')
+lt = partial(_value, name='lt', attrib='__lt__', err_msg='{selector} is not less than {value}.')
+gt = partial(_value, name='gt', attrib='__gt__', err_msg='{selector} is not greater than {value}.')
 eq = partial(_value, name='eq', attrib='__eq__', err_msg='{selector} is not equal to {value}.')
 ne = partial(_value, name='ne', attrib='__ne__', err_msg='{selector} is equal to {value}.')
 lte = partial(_value, name='lte', attrib='__le__', err_msg='{selector} is not less or equal to {value}.')

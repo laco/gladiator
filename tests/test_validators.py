@@ -10,13 +10,13 @@ comparison_validators_test_data = [
         'validator': gl.lt(5),
         'valid': [1, 2, 3, 4],
         'invalid': [5, 6, 7, 8, 9, 10],
-        'error': 'is not less then'
+        'error': 'is not less than'
     },
     {
         'validator': gl.gt(5),
         'valid': [6, 7, 8, 9, 10],
         'invalid': [1, 2, 3, 4, 5],
-        'error': 'is not greater then'
+        'error': 'is not greater than'
     },
     {
         'validator': gl.eq(5),

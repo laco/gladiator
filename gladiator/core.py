@@ -1,5 +1,4 @@
 import logging
-import sys
 from uuid import uuid4
 from gettext import NullTranslations
 from .utils import selector_as_string
