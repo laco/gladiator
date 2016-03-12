@@ -2,7 +2,7 @@ import logging
 from uuid import uuid4
 from gettext import NullTranslations
 from .utils import selector_as_string
-from .commons import ValidatorType, Success, Failure, Skip
+from .commons import ValidatorType, ValidationResult, Success, Failure, Skip
 
 
 # logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
@@ -102,6 +102,8 @@ def _primitive_validate(validator, obj, selector, ctx):
         return result, msg, msg_ctx
 
     _ret = validator(obj, selector=selector, ctx=ctx)
+    if isinstance(_ret, ValidationResult):
+        return _ret
     result, msg, msg_ctx = _parse_primitive_validator_ret(_ret)
     ret_cls = Success if result is True else Failure
     return ret_cls(
