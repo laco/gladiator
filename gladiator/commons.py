@@ -27,7 +27,7 @@ class ValidationResult(object):
 
     def __bool__(self):
         raise NotImplemented
-    
+
     @property
     def success(self):
         return bool(self)
@@ -63,7 +63,7 @@ class ValidationResult(object):
                 elif r.type_ == ValidatorType.composite:
                     err_list += r._error_list()
         return err_list
-        
+
     def __repr__(self):
         if self.type_ == ValidatorType.primitive:
             return "{0}[{1}]".format(
