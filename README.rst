@@ -7,7 +7,8 @@ Validation Framework for Python3
 .. image:: https://travis-ci.org/laco/gladiator.svg?branch=master
     :target: https://travis-ci.org/laco/gladiator
 
-.. image:: https://coveralls.io/repos/github/laco/gladiator/badge.svg?branch=master :target: https://coveralls.io/github/laco/gladiator?branch=master
+.. image:: https://coveralls.io/repos/github/laco/gladiator/badge.svg?branch=master 
+    :target: https://coveralls.io/github/laco/gladiator?branch=master
 
 A quick example
 ===============
