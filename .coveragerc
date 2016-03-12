@@ -1,0 +1,11 @@
+[run]
+omit = *test*.py
+
+[report]
+exclude_lines =
+    noqa
+    # Have to re-enable the standard pragma
+    pragma: no cover
+
+    # Don't complain about missing debug-only code:
+    def __repr__
