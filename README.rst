@@ -4,6 +4,9 @@ Gladiator
 
 Validation Framework for Python3
 
+.. image:: https://travis-ci.org/laco/gladiator.svg?branch=master
+    :target: https://travis-ci.org/laco/gladiator
+
 
 A quick example
 ===============
